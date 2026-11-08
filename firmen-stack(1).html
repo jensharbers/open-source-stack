@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Open-Source-Softwarestack für kleine Unternehmen</title>
+<style>
+:root{--bg:#f6f5f1;--panel:#fff;--ink:#1d2421;--mute:#5d6862;--line:#d9d8d0;--acc:#1c6b57;--acc-ink:#fff;--code-bg:#16201c;--code-ink:#d8efe4}
+@media (prefers-color-scheme:dark){:root{--bg:#121715;--panel:#1a211e;--ink:#e6ebe8;--mute:#9aa7a0;--line:#2c3631;--acc:#4fb596;--acc-ink:#0d1512;--code-bg:#0b0f0d;--code-ink:#cfe9dd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.7rem;margin:0 0 6px;letter-spacing:-.01em}
+.lead{color:var(--mute);max-width:62ch;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:1fr;gap:24px}
+@media(min-width:900px){.grid{grid-template-columns:1.1fr 1fr;align-items:start}.out{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}}
+fieldset{border:0;border-top:1px solid var(--line);margin:0 0 14px;padding:10px 0 0}
+legend{font-weight:650;padding:0 8px 0 0;font-size:1.05rem}
+label.item{display:flex;gap:10px;padding:8px 6px;border-radius:6px;cursor:pointer}
+label.item:hover{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+input[type=checkbox]{accent-color:var(--acc);width:18px;height:18px;margin-top:3px;flex:none}
+.name{font-weight:600}
+.d{display:block;color:var(--mute);font-size:.9rem}
+.tag{font-size:.75rem;color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;white-space:nowrap;font-weight:400}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+button{font:inherit;padding:8px 14px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.p{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:14px;border-radius:8px;overflow:auto;max-height:60vh;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+.out h2{font-size:1.1rem;margin:0 0 8px}
+.hint{color:var(--mute);font-size:.88rem;margin:10px 0 0}
+#st{min-height:1.3em;color:var(--acc);font-size:.9rem;margin:8px 0 0}
+.sh{font-size:1.25rem;margin:28px 0 4px}
+#mob{margin-top:22px}
+#mob ul{list-style:none;margin:0;padding:0}
+#mob li{padding:10px 0;border-top:1px solid var(--line)}
+#mob .lk{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#mob a.lnk{padding:5px 12px;font-size:.88rem}
+.foot{margin:36px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+a.lnk{display:inline-block;text-decoration:none;font:inherit;padding:8px 14px;border-radius:6px;border:1px solid var(--acc);background:var(--acc);color:var(--acc-ink);font-weight:600}
+a.lnk:hover{filter:brightness(1.08)}
+a.lnk:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+.out{scroll-margin-top:12px}
+.mbar{display:none}
+@media(max-width:899px){
+ h1{font-size:1.4rem}
+ .wrap{padding:16px max(14px,env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+ label.item{padding:12px 8px;min-height:52px;align-items:center}
+ input[type=checkbox]{width:24px;height:24px;margin-top:0}
+ button,a.lnk{min-height:44px}
+ .bar{gap:10px}
+ pre{font-size:12px;max-height:50vh}
+ .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;gap:10px;align-items:center;padding:10px max(14px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:var(--panel);border-top:1px solid var(--line)}
+ .mbar span{flex:1;font-size:.9rem;color:var(--mute)}
+ .mbar a.lnk{background:var(--panel);color:var(--acc);}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Open-Source-Softwarestack für kleine Unternehmen</h1>
+<p class="lead">Wähle, was deine Firma braucht. Rechts entsteht ein Installationsskript für Debian, Ubuntu und Ableger.</p>
+<div class="bar">
+  <button type="button" data-preset="solo">Solo-Start</button>
+  <button type="button" data-preset="all">Alles</button>
+  <button type="button" data-preset="none">Zurücksetzen</button>
+</div>
+<div class="grid">
+  <div id="left">
+    <div id="list"></div>
+    <p class="hint">Festplattenverschlüsselung (LUKS) richtest du bei der Systeminstallation ein, nicht per Skript.</p>
+    <p class="hint">Lokale KI braucht Arbeitsspeicher: Mit 8 GB RAM laufen kleine Modelle, 16 GB sind der angenehme Bereich. Jedes Modell ist mehrere Gigabyte groß und wird einmal heruntergeladen, danach läuft es offline.</p>
+    <h2 class="sh">Serverdienste</h2>
+    <p class="hint">Laufen in Docker auf deinem Rechner und sind nur über localhost erreichbar. Beim ersten Start brauchst du Internet, danach arbeitest du offline.</p>
+    <div id="slist"></div>
+  </div>
+  <div class="out" id="out">
+    <h2>Dein Installationsskript</h2>
+    <div class="bar">
+      <button type="button" class="p" id="dl">Herunterladen</button>
+      <button type="button" id="cp">Kopieren</button>
+    </div>
+    <pre id="code" tabindex="0"></pre>
+    <p id="st" role="status"></p>
+    <p class="hint">Lies das Skript, bevor du es startest: <code>bash firmen-stack-setup.sh</code>. Es fragt bei Bedarf nach deinem sudo-Passwort und braucht beim ersten Lauf Internet. Herkunftsangaben (DE, NL, BE) gelten nur für die Projekte, bei denen sie sicher sind.</p>
+    <div id="mob" hidden>
+      <h2>Fürs Handy</h2>
+      <p class="hint">Lade die Apps selbst im Store deiner Wahl herunter: Play Store, F-Droid, Accrescent oder App Store. Die Buttons führen zu den Projektseiten.</p>
+      <ul id="moblist"></ul>
+      <p class="hint" id="mobonly"></p>
+    </div>
+  </div>
+</div>
+<footer class="bar foot">
+  <a class="lnk" href="https://harbers-agrarinformatik.de/impressum.html" target="_blank" rel="noopener">Impressum</a>
+  <a class="lnk" href="https://harbers-agrarinformatik.de/datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+</footer>
+</div>
+<div class="mbar">
+  <span id="cnt">0 ausgewählt</span>
+  <a class="lnk" href="#out">Zum Skript</a>
+  <button type="button" class="p" id="dl2">Laden</button>
+</div>
+<script>
+// [id, Name, Beschreibung, Art (apt|fp|ai|note), Paket, Herkunft]
+const CAT = [
+["Büro und Wissen", [
+ ["libreoffice","LibreOffice","Texte, Tabellen, Präsentationen","apt","libreoffice libreoffice-l10n-de","DE"],
+ ["thunderbird","Thunderbird","E-Mail, Kalender, Kontakte mit lokalem Cache","apt","thunderbird",""],
+ ["keepassxc","KeePassXC","Passwörter in einer verschlüsselten Datei","apt","keepassxc",""],
+ ["joplin","Joplin","Notizen, synchronisierbar, offline nutzbar","fp","net.cozic.joplin_desktop",""],
+ ["logseq","Logseq","Wissensnetz aus verlinkten Notizen","fp","com.logseq.Logseq",""]
+]],
+["Dateien und Backups", [
+ ["nextcloud","Nextcloud-Client","Dateien mit deiner Nextcloud abgleichen","apt","nextcloud-desktop","DE"],
+ ["syncthing","Syncthing","Geräte direkt untereinander abgleichen, ohne Server","apt","syncthing",""],
+ ["cryptomator","Cryptomator","Cloud-Ordner verschlüsseln","fp","org.cryptomator.Cryptomator","DE"],
+ ["restic","restic","Verschlüsselte Backups","apt","restic",""],
+ ["borg","BorgBackup","Backups mit Deduplizierung","apt","borgbackup",""]
+]],
+["Geschäft", [
+ ["rechnungsfee","RechnungsFee","Rechnungen und Buchhaltung, DATEV-Export, Belegerkennung","ai","","DE-Recht"],
+ ["fakturama","Fakturama","Rechnungen, Lieferscheine, Bestellungen, E-Rechnung","note","","DE"]
+]],
+["Büro-Alltag", [
+ ["okular","Okular","PDFs lesen, markieren und kommentieren","apt","okular",""],
+ ["pdfarranger","PDF Arranger","PDFs zusammenfügen, teilen, Seiten sortieren","apt","pdfarranger",""],
+ ["xournalpp","Xournal++","PDFs unterschreiben und handschriftlich bearbeiten","apt","xournalpp",""],
+ ["ocrmypdf","OCRmyPDF","Gescannte PDFs durchsuchbar machen (Kommandozeile)","apt","ocrmypdf tesseract-ocr-deu",""],
+ ["simplescan","Simple Scan","Dokumente scannen","apt","simple-scan",""],
+ ["drawio","draw.io","Diagramme und Ablaufpläne","fp","com.jgraph.drawio.desktop",""],
+ ["freeplane","Freeplane","Mindmaps","apt","freeplane",""],
+ ["gnucash","GnuCash","Bankkonten verwalten, Online-Banking per HBCI","apt","gnucash",""],
+ ["kmymoney","KMyMoney","Alternative zu GnuCash","apt","kmymoney",""]
+]],
+["Laptop-Sicherheit", [
+ ["ufw","ufw (Firewall)","Blockiert eingehende Verbindungen, ausgehende bleiben frei","apt","ufw",""],
+ ["unattended","Automatische Sicherheitsupdates","Spielt Sicherheitsupdates von selbst ein","apt","unattended-upgrades",""],
+ ["wireguard","WireGuard","VPN-Zugang zu deinen Diensten über fremdes WLAN","apt","wireguard-tools",""],
+ ["timeshift","Timeshift","Systemschnappschüsse, falls ein Update schiefgeht","apt","timeshift",""],
+ ["vorta","Vorta","Grafische Oberfläche für BorgBackup","fp","com.borgbase.Vorta",""],
+ ["fail2ban","fail2ban","Sperrt Angreifer, falls du SSH aktivierst","apt","fail2ban",""]
+]],
+["Lokale KI", [
+ ["ollama","Ollama","Führt Sprachmodelle lokal aus, Schnittstelle nur auf localhost","sh","",""],
+ ["m-klein","Sprachmodell klein (ab 8 GB RAM)","qwen3:4b, schnell und mehrsprachig, für einfache Aufgaben","model","qwen3:4b",""],
+ ["m-mittel","Sprachmodell mittel (ab 16 GB RAM)","qwen3:8b, guter Allrounder für Texte, Zusammenfassungen, Code","model","qwen3:8b",""],
+ ["m-gross","Sprachmodell groß (16 GB RAM mit GPU oder 32 GB)","qwen3:14b, bessere Qualität, langsamer","model","qwen3:14b",""],
+ ["m-embed","Embedding-Modell","nomic-embed-text, für die Suche in eigenen Dokumenten","model","nomic-embed-text",""],
+ ["alpaca","Alpaca","Chat-Oberfläche für Ollama auf dem Desktop","fp","com.jeffser.Alpaca",""],
+ ["speechnote","Speech Note","Diktieren, Vorlesen und Übersetzen, komplett offline","fp","net.mkiol.SpeechNote",""]
+]],
+["Kommunikation", [
+ ["element","Element (Matrix)","Chat für Team und Kunden","fp","im.riot.Riot",""],
+ ["jitsi","Jitsi Meet","Videocalls","fp","org.jitsi.jitsi-meet",""]
+]],
+["Technik", [
+ ["git","Git","Versionsverwaltung","apt","git",""],
+ ["codium","VSCodium","Code-Editor ohne Telemetrie","fp","com.vscodium.codium",""],
+ ["hugo","Hugo","Statische Firmenwebsite bauen","apt","hugo",""]
+]],
+["Design", [
+ ["inkscape","Inkscape","Logos und Vektorgrafik","apt","inkscape",""],
+ ["gimp","GIMP","Bildbearbeitung","apt","gimp",""],
+ ["krita","Krita","Zeichnen und Illustration","apt","krita","NL"],
+ ["scribus","Scribus","Layout für Druck und PDF","apt","scribus",""]
+]]
+];
+// [id, Name, Beschreibung, Port, Compose-Datei, Hinweis, Herkunft]
+const SERV = [
+["odoo","Odoo Community","ERP und CRM: Kontakte, Angebote, Rechnungen, Lager","8069",`services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: %PW%
+    volumes:
+      - db:/var/lib/postgresql/data
+  odoo:
+    image: odoo:18.0
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:8069:8069"
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: %PW%
+    volumes:
+      - data:/var/lib/odoo
+volumes:
+  db:
+  data:`,"Beim ersten Aufruf die Datenbank anlegen und das Master-Passwort notieren.","BE"],
+["nextcloud-server","Nextcloud Server","Dateien, Kalender und Kontakte auf eigenem Server","8080",`services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: %PW%
+    volumes:
+      - db:/var/lib/postgresql/data
+  app:
+    image: nextcloud:apache
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: %PW%
+    volumes:
+      - nc:/var/www/html
+volumes:
+  db:
+  nc:`,"Beim ersten Aufruf das Admin-Konto anlegen.","DE"],
+["forgejo","Forgejo","Git-Server für Code und Dokumente","3000",`services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:11
+    restart: unless-stopped
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:2222:22"
+    volumes:
+      - data:/data
+volumes:
+  data:`,"Beim ersten Aufruf die Installationsseite abschließen. SSH läuft auf Port 2222.","DE"],
+["vaultwarden","Vaultwarden","Passwort-Tresor fürs Team, Bitwarden-kompatibel","8081",`services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
+    volumes:
+      - data:/data
+volumes:
+  data:`,"Für Browser-Erweiterung und Apps später HTTPS über einen Reverse Proxy einrichten.",""],
+["paperless","Paperless-ngx","Dokumentenarchiv mit Texterkennung für Belege und E-Rechnungen","8000",`services:
+  broker:
+    image: docker.io/library/redis:7
+    restart: unless-stopped
+  db:
+    image: docker.io/library/postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: %PW%
+    volumes:
+      - db:/var/lib/postgresql/data
+  web:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBPASS: %PW%
+      PAPERLESS_SECRET_KEY: %KEY%
+      PAPERLESS_OCR_LANGUAGE: deu
+      PAPERLESS_TIME_ZONE: Europe/Berlin
+    volumes:
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media
+      - ./consume:/usr/src/paperless/consume
+volumes:
+  db:
+  data:
+  media:`,"Paperless-Admin anlegen: cd ~/firmen-server/paperless und dann sudo docker compose run --rm web createsuperuser. Belege kommen in den Ordner consume.",""],
+["uptimekuma","Uptime Kuma","Überwacht, ob deine Dienste und Websites erreichbar sind","3001",`services:
+  kuma:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - data:/app/data
+volumes:
+  data:`,"Beim ersten Aufruf das Admin-Konto anlegen.",""],
+["vikunja","Vikunja","Aufgaben und Projekte als Liste oder Kanban","3456",`services:
+  vikunja:
+    image: vikunja/vikunja
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3456:3456"
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: http://localhost:3456
+      VIKUNJA_SERVICE_JWTSECRET: %KEY%
+      VIKUNJA_DATABASE_PATH: /db/vikunja.db
+    volumes:
+      - ./files:/app/vikunja/files
+      - ./db:/db`,"Beim ersten Aufruf ein Konto registrieren.","",["mkdir -p files db","sudo chown 1000:1000 files db"]],
+["kimai","Kimai","Zeiterfassung und Abrechnung nach Projekten","8001",`services:
+  sqldb:
+    image: mysql:8.3
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: kimai
+      MYSQL_USER: kimai
+      MYSQL_PASSWORD: %PW%
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mysql:/var/lib/mysql
+  kimai:
+    image: kimai/kimai2:apache
+    restart: unless-stopped
+    depends_on:
+      - sqldb
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      ADMINMAIL: admin@kimai.local
+      ADMINPASS: %PW%
+      DATABASE_URL: mysql://kimai:%PW%@sqldb/kimai?charset=utf8mb4&serverVersion=8.3.0
+      TRUSTED_HOSTS: localhost
+    volumes:
+      - data:/opt/kimai/var/data
+      - plugins:/opt/kimai/var/plugins
+volumes:
+  mysql:
+  data:
+  plugins:`,"Kimai-Zugang: admin@kimai.local, das Passwort steht unter DB_PW in ~/firmen-server/kimai/.env.",""]
+];
+const POST = {
+ ufw:["sudo ufw default deny incoming","sudo ufw default allow outgoing","sudo ufw --force enable"],
+ unattended:["sudo dpkg-reconfigure -f noninteractive unattended-upgrades"],
+ fail2ban:["sudo systemctl enable --now fail2ban"]
+};
+const NOTE = {
+ wireguard:"WireGuard: Konfiguration deines Servers als /etc/wireguard/wg0.conf ablegen und mit sudo wg-quick up wg0 starten.",
+ timeshift:"Timeshift: Beim ersten Start Speicherort und Zeitplan für Schnappschüsse wählen."
+};
+const PRESETS = {
+ solo:["libreoffice","thunderbird","keepassxc","nextcloud","joplin","rechnungsfee","cryptomator","restic","git","okular","pdfarranger","xournalpp","ocrmypdf","simplescan","drawio","freeplane","gnucash","element","jitsi"],
+ all:CAT.flatMap(c=>c[1].map(x=>x[0])).concat(SERV.map(x=>x[0])),
+ none:[]
+};
+const ALL = CAT.flatMap(c=>c[1]);
+const list = document.getElementById("list");
+list.innerHTML = CAT.map(([title,items])=>
+ '<fieldset><legend>'+title+'</legend>'+items.map(x=>
+  '<label class="item"><input type="checkbox" value="'+x[0]+'"><span><span class="name">'+x[1]+
+  (x[5]?'<span class="tag">'+x[5]+'</span>':'')+'</span><span class="d">'+x[2]+'</span></span></label>').join('')+'</fieldset>').join('');
+
+const left = document.getElementById("left");
+document.getElementById("slist").innerHTML = '<fieldset><legend>Dienste in Docker</legend>'+SERV.map(x=>
+ '<label class="item"><input type="checkbox" value="'+x[0]+'"><span><span class="name">'+x[1]+
+ (x[6]?'<span class="tag">'+x[6]+'</span>':'')+'</span><span class="d">'+x[2]+'</span></span></label>').join('')+'</fieldset>';
+
+function build(){
+ const sel=[...left.querySelectorAll("input:checked")].map(i=>i.value);
+ if(!sel.length) return "# Noch nichts ausgewählt. Hake links an, was du brauchst.";
+ const has=id=>sel.includes(id);
+ const items=ALL.filter(x=>has(x[0]));
+ const apt=[],fp=[],notes=[],models=[];
+ items.forEach(x=>{
+  if(x[3]==="apt") apt.push(...x[4].split(" "));
+  if(x[3]==="fp") fp.push(x[4]);
+  if(x[3]==="model") models.push(x[4]);
+ });
+ if(has("rechnungsfee")) apt.push("tesseract-ocr","tesseract-ocr-deu");
+ if(has("rechnungsfee")||has("ollama")||models.length||SERV.some(x=>has(x[0]))) apt.push("curl","openssl");
+ if(has("fakturama")) notes.push("Fakturama: Paket für deine Distribution von https://fakturama.info/downloads laden und installieren.");
+ const L=["#!/usr/bin/env bash",
+  "# Erzeugt mit dem Firmen-Stack-Baukasten. Für Debian, Ubuntu und Ableger.",
+  "set -euo pipefail",
+  'if [ "$(id -u)" -eq 0 ]; then echo "Bitte als normaler Benutzer starten, sudo wird bei Bedarf gefragt."; exit 1; fi',
+  ""];
+ if(apt.length||fp.length||has("rechnungsfee")){
+  L.push("sudo apt-get update","");
+ }
+ if(apt.length){
+  L.push("# Pakete aus den Distributions-Quellen","sudo apt-get install -y "+[...new Set(apt)].join(" "),"");
+ }
+ if(fp.length){
+  L.push("# Programme über Flathub",
+   "sudo apt-get install -y flatpak",
+   "flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo",
+   "flatpak install -y flathub "+fp.join(" "),"");
+ }
+ if(has("ollama")||models.length){
+  L.push("# Ollama: lokale Sprachmodelle (läuft nur auf localhost)",
+   "command -v ollama >/dev/null || curl -fsSL https://ollama.com/install.sh | sh",
+   'for i in $(seq 1 30); do curl -fsS http://127.0.0.1:11434 >/dev/null 2>&1 && break; sleep 1; done',
+   ...models.map(m=>"ollama pull "+m),"");
+  notes.push("Ollama: Die Schnittstelle liegt unter http://127.0.0.1:11434 (OpenAI-kompatibel unter /v1). Nicht ins Netz freigeben. Test: ollama run "+(models[0]||"qwen3:8b"));
+ }
+ const post=items.flatMap(x=>POST[x[0]]||[]);
+ if(post.length) L.push("# Einstellungen",...post,"");
+ items.forEach(x=>{ if(NOTE[x[0]]) notes.push(NOTE[x[0]]); });
+ if(has("rechnungsfee")){
+  L.push("# RechnungsFee (nur aus dem offiziellen Repo nicolettas-muggelbude/RechnungsFee laden)",
+   "sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64",
+   'mkdir -p "$HOME/Applications"',
+   'curl -fL -o "$HOME/Applications/RechnungsFee.AppImage" "https://github.com/nicolettas-muggelbude/RechnungsFee/releases/latest/download/RechnungsFee_amd64.AppImage"',
+   'chmod +x "$HOME/Applications/RechnungsFee.AppImage"',"");
+ }
+ const srv=SERV.filter(x=>has(x[0]));
+ if(srv.length){
+  L.push("# Docker (offizielles Installationsskript von get.docker.com, lies es vorher)",
+   "command -v docker >/dev/null || curl -fsSL https://get.docker.com | sudo sh",
+   'sudo usermod -aG docker "$USER"',
+   'SRV="$HOME/firmen-server"; mkdir -p "$SRV"',"");
+  srv.forEach(x=>{
+   const yml=x[4].split("%PW%").join("$"+"{DB_PW}").split("%KEY%").join("$"+"{KEY}");
+   L.push("# "+x[1]+": http://localhost:"+x[3],
+    'mkdir -p "$SRV/'+x[0]+'" && cd "$SRV/'+x[0]+'"',
+    ...(x[7]||[]),
+    '[ -f .env ] || { printf "DB_PW=%s\\nKEY=%s\\n" "$(openssl rand -hex 16)" "$(openssl rand -hex 32)" > .env; chmod 600 .env; }',
+    "cat > docker-compose.yml <<'EOF'", yml, "EOF",
+    "sudo docker compose up -d",
+    'cd "$SRV"',"");
+   if(x[5]) notes.push(x[1]+": "+x[5]);
+  });
+ }
+ if(has("syncthing")){
+  L.push("# Syncthing beim Anmelden automatisch starten","systemctl --user enable --now syncthing.service || true","");
+ }
+ if(notes.length){ L.push("# Manuelle Schritte",...notes.map(n=>'echo "'+n+'"'),""); }
+ L.push('echo "Fertig. Falls Docker oder Flatpak neu sind: einmal ab- und wieder anmelden."');
+ return L.join("\n");
+}
+const code=document.getElementById("code"), st=document.getElementById("st");
+const MOB = {
+ thunderbird:["Thunderbird für Android","Android","Auf dem iPhone ist Thunderbird noch nicht erschienen, nimm dort vorerst Apple Mail.",[["Thunderbird","https://www.thunderbird.net/"]]],
+ nextcloud:["Nextcloud","Android · iOS","Kalender und Kontakte: auf Android mit DAVx5, auf dem iPhone in den Systemeinstellungen. Dokumente scannen kannst du in der App.",[["Nextcloud-Apps","https://nextcloud.com/install/#install-clients"],["DAVx5","https://www.davx5.com/"]]],
+ joplin:["Joplin","Android · iOS","",[["Joplin","https://joplinapp.org/download/"]]],
+ keepassxc:["KeePassDX oder KeePassium/Strongbox","Android · iOS","Öffnen dieselbe Passwort-Datei wie KeePassXC.",[["KeePassDX (Android)","https://www.keepassdx.com/"],["KeePassium (iOS)","https://keepassium.com/"],["Strongbox (iOS)","https://strongboxsafe.com/"]]],
+ cryptomator:["Cryptomator","Android · iOS","",[["Cryptomator","https://cryptomator.org/downloads/"]]],
+ element:["Element","Android · iOS","Auf GrapheneOS ohne Google-Dienste kommen Benachrichtigungen nur über UnifiedPush, zum Beispiel mit ntfy.",[["Element","https://element.io/download"]]],
+ jitsi:["Jitsi Meet","Android · iOS","",[["Jitsi","https://jitsi.org/downloads/"]]],
+ libreoffice:["Collabora Office","Android · iOS","Baut auf LibreOffice auf. Eine offizielle LibreOffice-App zum Bearbeiten gibt es nicht.",[["Collabora Office","https://www.collaboraoffice.com/"]]],
+ gnucash:["GnuCash für Android","Android","Begleit-App für unterwegs. Auf iOS gibt es keine Entsprechung.",[["F-Droid","https://f-droid.org/packages/org.gnucash.android/"]]],
+ xournalpp:["Saber (Handschrift-Notizen)","Android · iOS","Ersatz für Xournal++.",[["Saber","https://saber.adil.hanney.org/"]]],
+ syncthing:["Syncthing-Fork","Android","Auf iOS gibt es keine offizielle App.",[["F-Droid","https://f-droid.org/packages/com.github.catfriend1.syncthingandroid/"]]],
+ drawio:["draw.io im Browser","Browser","",[["draw.io","https://app.diagrams.net/"]]],
+ vaultwarden:["Bitwarden","Android · iOS","Der Server muss vom Handy erreichbar sein (HTTPS und Netzzugang).",[["Bitwarden","https://bitwarden.com/download/"]]]
+};
+const mobBox=document.getElementById("mob"), mobList=document.getElementById("moblist"), mobOnly=document.getElementById("mobonly");
+function renderMob(sel){
+ const rows=sel.filter(id=>MOB[id]);
+ const lap=ALL.filter(x=>sel.includes(x[0])&&!MOB[x[0]]&&x[3]!=="model").map(x=>x[1]);
+ const srv=SERV.some(x=>sel.includes(x[0])&&!MOB[x[0]]);
+ mobBox.hidden=!rows.length&&!lap.length&&!srv;
+ mobList.innerHTML=rows.map(id=>{const m=MOB[id];return '<li><strong>'+m[0]+'</strong><span class="tag">'+m[1]+'</span>'+(m[2]?'<span class="d">'+m[2]+'</span>':'')+'<span class="lk">'+m[3].map(l=>'<a class="lnk" href="'+l[1]+'" target="_blank" rel="noopener">'+l[0]+'</a>').join('')+'</span></li>';}).join('');
+ mobOnly.textContent=(lap.length?'Nur am Laptop: '+lap.join(', ')+'. ':'')+(srv?'Die Serverdienste laufen lokal auf dem Laptop und sind vom Handy aus nicht erreichbar.':'');
+}
+function refresh(){ renderMob([...left.querySelectorAll("input:checked")].map(i=>i.value)); code.textContent=build(); document.getElementById("cnt").textContent=left.querySelectorAll("input:checked").length+" ausgewählt"; }
+left.addEventListener("change",refresh);
+document.querySelectorAll("[data-preset]").forEach(b=>b.addEventListener("click",()=>{
+ const set=PRESETS[b.dataset.preset];
+ left.querySelectorAll("input").forEach(i=>i.checked=set.includes(i.value));
+ refresh();
+}));
+document.getElementById("cp").addEventListener("click",async()=>{
+ try{ await navigator.clipboard.writeText(code.textContent); st.textContent="Skript kopiert."; }
+ catch(e){ st.textContent="Kopieren nicht möglich. Markiere den Text und kopiere ihn von Hand."; }
+});
+["dl","dl2"].forEach(id=>document.getElementById(id).addEventListener("click",()=>{
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([code.textContent+"\n"],{type:"text/x-shellscript"}));
+ a.download="firmen-stack-setup.sh";
+ document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ st.textContent="firmen-stack-setup.sh heruntergeladen.";
+}));
+refresh();
+</script>
+</body>
+</html>
