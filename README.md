@@ -7,7 +7,7 @@ Wähle im Browser, was dein Unternehmen braucht, und erhalte ein fertiges Instal
 ## Was die Seite kann
 
 - **Programme anhaken**, geordnet nach Gruppen: Büro und Wissen, Dateien und Backups, Geschäft, Büro-Alltag, Laptop-Sicherheit, Lokale KI, Kommunikation, Technik, Design.
-- **Serverdienste anhaken**, die in Docker laufen und nur lokal erreichbar sind: Odoo, Nextcloud, Forgejo, Vaultwarden, Paperless-ngx, Uptime Kuma, Vikunja, Kimai.
+- **Serverdienste anhaken**, die in Docker laufen und nur lokal erreichbar sind: Odoo, Nextcloud, Forgejo, Vaultwarden, Paperless-ngx, Uptime Kuma, Vikunja, Kimai und Haben (Beta, braucht Domain und HTTPS).
 - **Voreinstellung „Solo-Start"** für Einzelunternehmer, außerdem „Alles" und „Zurücksetzen".
 - **Installationsskript** für Debian, Ubuntu und Ableger, das sich live mit der Auswahl ändert. Kopieren oder als `firmen-stack-setup.sh` herunterladen.
 - **Lokale KI** mit Ollama und Sprachmodellen nach Arbeitsspeicher gestaffelt.
@@ -39,7 +39,7 @@ Die Seite ist eine einzelne HTML-Datei. Sie läuft komplett im Browser, braucht 
 - Richtet bei Auswahl ufw, automatische Sicherheitsupdates und fail2ban ein.
 - Gibt am Ende Hinweise zu manuellen Schritten aus, etwa Admin-Konten oder die WireGuard-Konfiguration.
 
-Alle Serverdienste werden nur an `127.0.0.1` gebunden. Für Zugriff von außen brauchst du einen Reverse Proxy mit HTTPS, den das Skript nicht einrichtet.
+Alle Serverdienste außer Haben werden nur an `127.0.0.1` gebunden. Für Zugriff von außen brauchst du einen Reverse Proxy mit HTTPS, den das Skript nicht einrichtet. Haben bringt seinen eigenen HTTPS-Proxy (Caddy) mit, braucht dafür eine Domain und die Ports 80 und 443 und gehört deshalb auf einen Server statt auf den Laptop.
 
 ## Wichtige Hinweise
 
