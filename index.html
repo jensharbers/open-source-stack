@@ -72,7 +72,7 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
     <p class="hint">Festplattenverschlüsselung (LUKS) richtest du bei der Systeminstallation ein, nicht per Skript.</p>
     <p class="hint">Lokale KI braucht Arbeitsspeicher: Mit 8 GB RAM laufen kleine Modelle, 16 GB sind der angenehme Bereich. Jedes Modell ist mehrere Gigabyte groß und wird einmal heruntergeladen, danach läuft es offline.</p>
     <h2 class="sh">Serverdienste</h2>
-    <p class="hint">Laufen in Docker auf deinem Rechner und sind nur über localhost erreichbar. Beim ersten Start brauchst du Internet, danach arbeitest du offline.</p>
+    <p class="hint">Laufen in Docker auf deinem Rechner und sind nur über localhost erreichbar. Ausnahme ist Haben: Es braucht eine Domain mit HTTPS und gehört auf einen Server. Beim ersten Start brauchst du Internet, danach arbeitest du offline.</p>
     <div id="slist"></div>
   </div>
   <div class="out" id="out">
@@ -334,7 +334,20 @@ volumes:
 volumes:
   mysql:
   data:
-  plugins:`,"Kimai-Zugang: admin@kimai.local, das Passwort steht unter DB_PW in ~/firmen-server/kimai/.env.",""]
+  plugins:`,"Kimai-Zugang: admin@kimai.local, das Passwort steht unter DB_PW in ~/firmen-server/kimai/.env.",""],
+["haben","Haben (Beta)","Buchhaltung mit E-Rechnung, Bankabgleich, EÜR und ELSTER, braucht Domain und HTTPS","","","Haben: Die Domain muss auf diesen Server zeigen, Ports 80 und 443 müssen erreichbar sein. Konto anlegen und ELSTER einrichten steht in der Dokumentation unter firsttris.github.io/haben. Sichere den ENCRYPTION_KEY aus ~/firmen-server/haben/.env an einem zweiten Ort. Beta: Vor jedem Update ein Backup machen.","DE · Beta",[
+ 'setenv(){ if grep -q "^$1=" .env; then sed -i "s|^$1=.*|$1=$2|" .env; else echo "$1=$2" >> .env; fi; }',
+ 'if [ ! -f .env ]; then',
+ '  curl -fsSLO https://raw.githubusercontent.com/firsttris/haben/main/deploy/compose.yml',
+ '  curl -fsSL -o .env https://raw.githubusercontent.com/firsttris/haben/main/deploy/compose.env.example',
+ '  read -rp "Domain für Haben (muss auf diesen Server zeigen): " HDOM',
+ '  setenv DOMAIN "$HDOM"',
+ '  setenv DB_PASSWORD "$(openssl rand -hex 24)"',
+ '  setenv AUTH_SECRET "$(openssl rand -base64 32)"',
+ '  setenv ENCRYPTION_KEY "$(openssl rand -base64 32)"',
+ '  chmod 600 .env',
+ 'fi'
+]]
 ];
 const POST = {
  ufw:["sudo ufw default deny incoming","sudo ufw default allow outgoing","sudo ufw --force enable"],
@@ -417,12 +430,12 @@ function build(){
    'sudo usermod -aG docker "$USER"',
    'SRV="$HOME/firmen-server"; mkdir -p "$SRV"',"");
   srv.forEach(x=>{
-   const yml=x[4].split("%PW%").join("$"+"{DB_PW}").split("%KEY%").join("$"+"{KEY}");
-   L.push("# "+x[1]+": http://localhost:"+x[3],
+   const yml=(x[4]||"").split("%PW%").join("$"+"{DB_PW}").split("%KEY%").join("$"+"{KEY}");
+   L.push("# "+x[1]+(x[3]?": http://localhost:"+x[3]:""),
     'mkdir -p "$SRV/'+x[0]+'" && cd "$SRV/'+x[0]+'"',
     ...(x[7]||[]),
     '[ -f .env ] || { printf "DB_PW=%s\\nKEY=%s\\n" "$(openssl rand -hex 16)" "$(openssl rand -hex 32)" > .env; chmod 600 .env; }',
-    "cat > docker-compose.yml <<'EOF'", yml, "EOF",
+    ...(x[4]?["cat > docker-compose.yml <<'EOF'", yml, "EOF"]:[]),
     "sudo docker compose up -d",
     'cd "$SRV"',"");
    if(x[5]) notes.push(x[1]+": "+x[5]);
@@ -449,7 +462,8 @@ const MOB = {
  xournalpp:["Saber (Handschrift-Notizen)","Android · iOS","Ersatz für Xournal++.",[["Saber","https://saber.adil.hanney.org/"]]],
  syncthing:["Syncthing-Fork","Android","Auf iOS gibt es keine offizielle App.",[["F-Droid","https://f-droid.org/packages/com.github.catfriend1.syncthingandroid/"]]],
  drawio:["draw.io im Browser","Browser","",[["draw.io","https://app.diagrams.net/"]]],
- vaultwarden:["Bitwarden","Android · iOS","Der Server muss vom Handy erreichbar sein (HTTPS und Netzzugang).",[["Bitwarden","https://bitwarden.com/download/"]]]
+ vaultwarden:["Bitwarden","Android · iOS","Der Server muss vom Handy erreichbar sein (HTTPS und Netzzugang).",[["Bitwarden","https://bitwarden.com/download/"]]],
+ haben:["Haben als App installieren","Android · iOS (über den Browser)","Haben ist eine Web-App auf deinem Server und lässt sich im Browser als App installieren.",[["Anleitung","https://firsttris.github.io/haben/einrichtung.html#als-app-installieren"]]]
 };
 const mobBox=document.getElementById("mob"), mobList=document.getElementById("moblist"), mobOnly=document.getElementById("mobonly");
 function renderMob(sel){
