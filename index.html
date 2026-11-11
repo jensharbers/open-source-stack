@@ -121,7 +121,8 @@ const CAT = [
 ]],
 ["Geschäft", [
  ["rechnungsfee","RechnungsFee","Rechnungen und Buchhaltung, DATEV-Export, Belegerkennung","ai","","DE-Recht"],
- ["fakturama","Fakturama","Rechnungen, Lieferscheine, Bestellungen, E-Rechnung","note","","DE"]
+ ["fakturama","Fakturama","Rechnungen, Lieferscheine, Bestellungen, E-Rechnung","note","","DE"],
+ ["superproductivity","Super Productivity","Aufgaben mit Zeiterfassung pro Aufgabe, Daten bleiben lokal, auch als Android-App","fp","com.super_productivity.SuperProductivity",""]
 ]],
 ["Büro-Alltag", [
  ["okular","Okular","PDFs lesen, markieren und kommentieren","apt","okular",""],
@@ -335,7 +336,7 @@ volumes:
   mysql:
   data:
   plugins:`,"Kimai-Zugang: admin@kimai.local, das Passwort steht unter DB_PW in ~/firmen-server/kimai/.env.",""],
-["haben","Haben (Beta)","Buchhaltung mit E-Rechnung, Bankabgleich, EÜR und ELSTER, braucht Domain und HTTPS","","","Haben: Die Domain muss auf diesen Server zeigen, Ports 80 und 443 müssen erreichbar sein. Konto anlegen und ELSTER einrichten steht in der Dokumentation unter firsttris.github.io/haben. Sichere den ENCRYPTION_KEY aus ~/firmen-server/haben/.env an einem zweiten Ort. Beta: Vor jedem Update ein Backup machen.","DE · Beta",[
+["haben","Haben (Beta)","Buchhaltung mit E-Rechnung, Bankabgleich, EÜR und ELSTER, braucht Domain und HTTPS","","","Die Domain muss auf diesen Server zeigen, Ports 80 und 443 müssen erreichbar sein. Konto anlegen und ELSTER einrichten steht in der Dokumentation unter firsttris.github.io/haben. Sichere den ENCRYPTION_KEY aus ~/firmen-server/haben/.env an einem zweiten Ort. Beta: Vor jedem Update ein Backup machen.","DE · Beta",[
  'setenv(){ if grep -q "^$1=" .env; then sed -i "s|^$1=.*|$1=$2|" .env; else echo "$1=$2" >> .env; fi; }',
  'if [ ! -f .env ]; then',
  '  curl -fsSLO https://raw.githubusercontent.com/firsttris/haben/main/deploy/compose.yml',
@@ -347,7 +348,8 @@ volumes:
  '  setenv ENCRYPTION_KEY "$(openssl rand -base64 32)"',
  '  chmod 600 .env',
  'fi'
-]]
+]],
+["kontext","Kontext (Beta, nur Hinweis)","Mail, Kalender, Kontakte und Chat auf eigenem Server, Alternative zu Google Workspace. Braucht Domain und eigenen Mailserver, deshalb ohne Automatik","","","Braucht einen eigenen Mailserver (Stalwart) mit Domain und offenen Ports 25, 80, 443, 465, 587 und 993. Das Skript installiert ihn nicht. Folge der Installationsanleitung im Projekt unter github.com/firsttris/kontext.","EU · Beta",[],"info"]
 ];
 const POST = {
  ufw:["sudo ufw default deny incoming","sudo ufw default allow outgoing","sudo ufw --force enable"],
@@ -359,7 +361,7 @@ const NOTE = {
  timeshift:"Timeshift: Beim ersten Start Speicherort und Zeitplan für Schnappschüsse wählen."
 };
 const PRESETS = {
- solo:["libreoffice","thunderbird","keepassxc","nextcloud","joplin","rechnungsfee","cryptomator","restic","git","okular","pdfarranger","xournalpp","ocrmypdf","simplescan","drawio","freeplane","gnucash","element","jitsi"],
+ solo:["libreoffice","thunderbird","keepassxc","nextcloud","joplin","rechnungsfee","cryptomator","restic","git","okular","pdfarranger","xournalpp","ocrmypdf","simplescan","drawio","freeplane","gnucash","element","jitsi","superproductivity"],
  all:CAT.flatMap(c=>c[1].map(x=>x[0])).concat(SERV.map(x=>x[0])),
  none:[]
 };
@@ -424,12 +426,14 @@ function build(){
    'chmod +x "$HOME/Applications/RechnungsFee.AppImage"',"");
  }
  const srv=SERV.filter(x=>has(x[0]));
- if(srv.length){
+ srv.filter(x=>x[8]==="info").forEach(x=>{ if(x[5]) notes.push(x[1]+": "+x[5]); });
+ const real=srv.filter(x=>x[8]!=="info");
+ if(real.length){
   L.push("# Docker (offizielles Installationsskript von get.docker.com, lies es vorher)",
    "command -v docker >/dev/null || curl -fsSL https://get.docker.com | sudo sh",
    'sudo usermod -aG docker "$USER"',
    'SRV="$HOME/firmen-server"; mkdir -p "$SRV"',"");
-  srv.forEach(x=>{
+  real.forEach(x=>{
    const yml=(x[4]||"").split("%PW%").join("$"+"{DB_PW}").split("%KEY%").join("$"+"{KEY}");
    L.push("# "+x[1]+(x[3]?": http://localhost:"+x[3]:""),
     'mkdir -p "$SRV/'+x[0]+'" && cd "$SRV/'+x[0]+'"',
@@ -463,6 +467,9 @@ const MOB = {
  syncthing:["Syncthing-Fork","Android","Auf iOS gibt es keine offizielle App.",[["F-Droid","https://f-droid.org/packages/com.github.catfriend1.syncthingandroid/"]]],
  drawio:["draw.io im Browser","Browser","",[["draw.io","https://app.diagrams.net/"]]],
  vaultwarden:["Bitwarden","Android · iOS","Der Server muss vom Handy erreichbar sein (HTTPS und Netzzugang).",[["Bitwarden","https://bitwarden.com/download/"]]],
+ kontext:["Kontext als App installieren","Android · iOS (über den Browser)","Läuft als Web-App auf deinem Server und lässt sich im Browser als App installieren.",[["Projekt","https://github.com/firsttris/kontext"]]],
+ superproductivity:["Super Productivity","Android · iOS","Dieselbe App gibt es mobil. Den Abgleich mit dem Laptop stellst du in den Einstellungen ein, zum Beispiel über WebDAV mit deiner Nextcloud. Ohne Abgleich bleiben die Daten nur auf dem Gerät.",[["Super Productivity","https://super-productivity.com/"]]],
+ kimai:["Kimai-Apps von Drittanbietern","Android · iOS","Nicht vom Kimai-Projekt selbst und kostenpflichtig (laut Vergleich einmalig rund 20 Euro). Der Server muss vom Handy erreichbar sein.",[["Kimai","https://www.kimai.org/"]]],
  haben:["Haben als App installieren","Android · iOS (über den Browser)","Haben ist eine Web-App auf deinem Server und lässt sich im Browser als App installieren.",[["Anleitung","https://firsttris.github.io/haben/einrichtung.html#als-app-installieren"]]]
 };
 const mobBox=document.getElementById("mob"), mobList=document.getElementById("moblist"), mobOnly=document.getElementById("mobonly");
